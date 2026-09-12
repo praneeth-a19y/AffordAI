@@ -25,8 +25,12 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ simulation, curren
 
   if (!simulation || !simulation.baselineBalances || simulation.baselineBalances.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-8 border border-slate-200 text-center text-slate-400 text-sm h-80 flex items-center justify-center">
-        Loading 90-day cash flow simulation data...
+      <div className="bg-white rounded-xl p-8 border border-slate-200 text-center text-slate-500 text-sm h-72 flex flex-col items-center justify-center space-y-2">
+        <TrendingUp className="w-8 h-8 text-slate-300" />
+        <p className="font-semibold text-slate-700">90-Day Simulation Requires Financial Balance State</p>
+        <p className="text-xs text-slate-400 max-w-md">
+          Bank balance and recurring expenses are not provided for this row in <code>requests.csv</code>. AffordAI strictly enforces a zero-fabrication policy. Click <strong>Simulate Custom Scenario</strong> in the top bar to test custom balances and see live 90-day cash flow trajectories.
+        </p>
       </div>
     );
   }

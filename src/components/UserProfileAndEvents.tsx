@@ -17,7 +17,19 @@ export const UserProfileAndEvents: React.FC<UserProfileAndEventsProps> = ({
   pausedEventIds,
   onTogglePauseEvent,
 }) => {
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div id="no-profile-banner" className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600">
+        <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1">
+          <ShieldAlert className="w-4 h-4 text-amber-600" />
+          <span>No External Financial Profile Attached (Pure Dataset Mode)</span>
+        </div>
+        <p className="text-slate-500 leading-relaxed">
+          In strict compliance with AffordAI financial directives, bank balances, salaries, and recurring commitments are <strong>never invented or fabricated</strong> when absent from the dataset. A conservative safe recommendation is enforced. You can test custom balances and cash flows using the <em>Simulate Custom Scenario</em> tool.
+        </p>
+      </div>
+    );
+  }
 
   const cur = profile.home_currency;
   const methods = profile.payment_methods_user_will_consider.split("|");

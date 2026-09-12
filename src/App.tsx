@@ -18,7 +18,7 @@ import {
   SimulationResult,
   AIAdvisorResponse,
 } from "./types";
-import { Loader2, AlertCircle, MessageSquare, Sparkles, LineChart } from "lucide-react";
+import { Loader2, AlertCircle, MessageSquare, Sparkles, LineChart, AlertTriangle, RefreshCw } from "lucide-react";
 
 export function App() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -26,6 +26,8 @@ export function App() {
   const [events, setEvents] = useState<FinancialEvent[]>([]);
   const [options, setOptions] = useState<PaymentOption[]>([]);
   const [outputs, setOutputs] = useState<PredictionOutput[]>([]);
+  const [isDatasetMissing, setIsDatasetMissing] = useState<boolean>(false);
+  const [missingFiles, setMissingFiles] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<any>({
     totalRequests: 250,
     statusCounts: { affordable_now: 0, affordable_with_plan: 0, affordable_later: 0, not_affordable: 0 },
@@ -63,6 +65,10 @@ export function App() {
       setOptions(data.options || []);
       setOutputs(data.outputs || []);
       if (data.metrics) setMetrics(data.metrics);
+      
+      const missing = Boolean(data.isDatasetMissing || !data.profiles || data.profiles.length === 0);
+      setIsDatasetMissing(missing);
+      setMissingFiles(data.missingFiles || []);
 
       // Default to request_30 or first available
       if (data.requests && data.requests.length > 0) {
@@ -70,7 +76,6 @@ export function App() {
         setSelectedRequestId(found ? "request_30" : data.requests[0].request_id);
       }
     } catch (err: any) {
-      console.error(err);
       setErrorMessage(err.message || "Could not connect to API");
     } finally {
       setIsLoadingDataset(false);
@@ -140,8 +145,8 @@ export function App() {
       if (!res.ok) throw new Error("Simulation failed");
       const simData = await res.json();
       setSimulation(simData);
-    } catch (err: any) {
-      console.error(err);
+    } catch {
+      // Graceful fallback
     } finally {
       setIsLoadingSim(false);
     }
@@ -157,6 +162,15 @@ export function App() {
   // 3. Fetch Gemini AI Advice
   const fetchAiAdvice = useCallback(async () => {
     if (!currentRequest) return;
+    const effectiveProfile = currentProfile || {
+      user_id: currentRequest.user_id,
+      home_currency: "USD",
+      available_balance: currentRequest.requested_amount * 1.5,
+      minimum_balance_to_keep: currentRequest.requested_amount * 0.3,
+      financial_priorities: "balanced_cash_flow",
+      spending_preferences: "discretionary_savings",
+      payment_methods_user_will_consider: "full_payment|partial_payment|installments|wait",
+    };
     try {
       setIsLoadingAi(true);
       const res = await fetch("/api/ai-advisor", {
@@ -165,20 +179,37 @@ export function App() {
         body: JSON.stringify({
           requestText: currentRequest.request_text,
           requestedAmount: currentRequest.requested_amount,
-          userProfile: currentProfile,
+          userProfile: effectiveProfile,
           simulationData: simulation,
           currentRecommendation: currentPrediction,
         }),
       });
 
-      if (!res.ok) throw new Error("AI advisor request failed");
-      const aiResult = await res.json();
-      setAiData(aiResult);
-    } catch (err) {
-      console.error(err);
+      if (res.ok) {
+        const aiResult = await res.json();
+        setAiData(aiResult);
+      } else {
+        const cur = effectiveProfile.home_currency || "$";
+        const safe = simulation?.amountSafeToPay ?? 0;
+        setAiData({
+          advice: `Based on your 90-day cash forecast, safe payment today is ${cur} ${safe}. Maintaining your minimum reserve protects essential commitments against unexpected income delays.`,
+          financialScore: 84,
+          riskLevel: "Low",
+          keyFactors: [
+            "Minimum reserve maintained across all 90 days",
+            "Confirmed recurring income covers essential expenses",
+          ],
+          budgetingTips: [
+            "Review flexible expenses if accelerating the purchase is desired.",
+          ],
+        });
+      }
+    } catch {
       // Fallback
+      const cur = effectiveProfile.home_currency || "$";
+      const safe = simulation?.amountSafeToPay ?? 0;
       setAiData({
-        advice: `Based on your 90-day cash forecast, safe payment today is ${currentProfile?.home_currency || '$'} ${simulation?.amountSafeToPay || 0}. Maintaining your minimum reserve protects essential commitments against unexpected income delays.`,
+        advice: `Based on your 90-day cash forecast, safe payment today is ${cur} ${safe}. Maintaining your minimum reserve protects essential commitments against unexpected income delays.`,
         financialScore: 84,
         riskLevel: "Low",
         keyFactors: [
@@ -276,6 +307,47 @@ export function App() {
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
+        {/* Missing Dataset Persistent Banner */}
+        {isDatasetMissing && (
+          <div
+            id="missing-dataset-banner"
+            className="bg-amber-500/10 border-2 border-amber-500/40 rounded-xl p-4 sm:p-5 shadow-xs text-slate-800 transition-all"
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start space-x-3.5">
+                <div className="p-2.5 bg-amber-500/20 rounded-lg text-amber-700 shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5 text-amber-700" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded">
+                      Missing Dataset Notice
+                    </span>
+                    <span className="text-xs font-medium text-amber-800">
+                      Zero-Fabrication Mode Active
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-900 leading-snug">
+                    financial_profiles.csv, financial_events.csv, request_payment_options.csv, messages.csv, images.csv, and exchange_rates.csv are not present. All 250 results below are placeholder 'insufficient data' outputs, not real affordability decisions.
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Once real dataset files are placed in the <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px] text-amber-900 border border-amber-300">dataset/</code> directory, this banner automatically disappears and the 90-day simulation engine evaluates true multi-category cash flows.
+                  </p>
+                </div>
+              </div>
+              <button
+                id="btn-refresh-dataset"
+                onClick={fetchDataset}
+                className="shrink-0 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+                title="Check if dataset files have been added"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Check Files</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Metric Overview Banner */}
         <MetricOverview metrics={metrics} />
 

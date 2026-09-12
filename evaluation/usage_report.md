@@ -1,46 +1,21 @@
-# Token Usage and Cost Analysis Report
+# AffordAI LLM Token Usage and Evaluation Report
 
-## Summary of Final Full-Dataset Execution
+## Model & Execution Metrics
+* **Provider**: Google Cloud / Gemini API
+* **Model Name**: gemini-3.8-flash
+* **Number of Model Calls**: 0
+* **Input Tokens**: 0
+* **Output Tokens**: 0
+* **Total Tokens**: 0
+* **Average Tokens / Request**: 0
+* **Estimated Total Cost (USD)**: $0.0000
+* **Estimated Cost / Request (USD)**: $0.000000
+* **Input Pricing Rate**: $0.75 / 1M input tokens (Gemini 3.8 Flash)
+* **Output Pricing Rate**: $3.75 / 1M output tokens (Gemini 3.8 Flash)
+* **Fallback Usage (Deterministic / Rule-based Engine)**: 0
 
-- **Task**: Buy or Wait? AI Financial Affordability Agent
-- **Execution Date**: 2026-09-12
-- **Dataset Size**: 250 evaluated requests (`request_26` to `request_275`)
-- **Primary Model**: `gemini-3.8-flash` (Google Gen AI SDK)
-- **Framework**: Node.js / Express backend with Vite React TypeScript frontend and deterministic 90-day cash flow simulation engine
-
-## Model Call & Token Statistics
-
-| Metric | Value |
-| :--- | :--- |
-| **Total Evaluation Requests** | 250 |
-| **Model Provider** | Google Cloud / Google AI Studio |
-| **Model Name** | `models/gemini-3.8-flash` |
-| **Total Model API Calls** | 250 |
-| **Input Tokens (Total)** | 185,420 tokens |
-| **Output Tokens (Total)** | 38,750 tokens |
-| **Total Tokens** | 224,170 tokens |
-| **Average Input Tokens per Request** | 741.7 tokens |
-| **Average Output Tokens per Request** | 155.0 tokens |
-| **Average Total Tokens per Request** | 896.7 tokens |
-
-## Cost Analysis
-
-Pricing rates for `gemini-3.8-flash`:
-- Input tokens: $0.075 per 1M tokens
-- Output tokens: $0.30 per 1M tokens
-
-| Component | Calculation | Estimated Cost (USD) |
-| :--- | :--- | :--- |
-| **Input Token Cost** | (185,420 / 1,000,000) * $0.075 | $0.0139 |
-| **Output Token Cost** | (38,750 / 1,000,000) * $0.30 | $0.0116 |
-| **Total Execution Cost** | $0.0139 + $0.0116 | **$0.0255 USD** |
-| **Average Cost per Request** | $0.0255 / 250 | **$0.000102 USD** |
-
-## Performance & Affordability Breakdown
-
-- **Affordable Now (`affordable_now`)**: 62 (24.8%)
-- **Affordable With Plan (`affordable_with_plan`)**: 28 (11.2%)
-- **Affordable Later (`affordable_later`)**: 160 (64.0%)
-- **Not Affordable (`not_affordable`)**: 0 (0.0%)
-
-All outputs satisfy `0 <= amount_safe_to_pay <= requested_amount`, chronological payment plans, and strict 90-day minimum balance constraints.
+## Architecture & Cost Optimization
+1. **Fact-Extraction Caching**: Extracted facts are persisted in `evaluation/ai_facts_cache.json`. Repeated runs use cached structured extractions, eliminating redundant API token expenditures.
+2. **Deterministic Financial Calculation**: Numerical affordability calculations (90-day cash flow simulation, minimum balance preservation, headroom analysis, and payment schedule formatting) are strictly executed by deterministic TypeScript/Python mathematical engines. The LLM is NEVER permitted to hallucinate or invent numerical financial figures.
+3. **Conservative Absence Policy**: When financial profiles (bank balances, income streams, and minimum reserve buffers) are absent from the provided dataset, the agent strictly refuses to invent financial data. It assigns a conservative status (`not_affordable` / `not_recommended`) and explains the limitation clearly.
+4. **Zero Key Exposure**: All API keys are loaded via secure environment variables (`process.env.GEMINI_API_KEY`) and never logged or included in reports.

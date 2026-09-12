@@ -76,21 +76,25 @@ Your protected reserve buffer of **${cur} ${Number(profile.minimum_balance_to_ke
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Chat request failed");
+      if (res.ok) {
+        const data = await res.json();
+        const aiReply: ChatMessage = {
+          id: "ai-" + Date.now(),
+          sender: "afford-ai",
+          text: data.reply || "I evaluated your liquidity trajectory.",
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setMessages((prev) => [...prev, aiReply]);
+      } else {
+        const errorMsg: ChatMessage = {
+          id: "ai-err-" + Date.now(),
+          sender: "afford-ai",
+          text: `Based on your cash flow model, your maximum safe expenditure today is **${cur} ${simulation?.amountSafeToPay ?? 0}**. Any expenditure exceeding this breaches your mandatory **${cur} ${profile?.minimum_balance_to_keep ?? 0}** emergency buffer.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
       }
-
-      const data = await res.json();
-      const aiReply: ChatMessage = {
-        id: "ai-" + Date.now(),
-        sender: "afford-ai",
-        text: data.reply || "I evaluated your liquidity trajectory.",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-
-      setMessages((prev) => [...prev, aiReply]);
     } catch (err) {
-      console.error(err);
       const errorMsg: ChatMessage = {
         id: "ai-err-" + Date.now(),
         sender: "afford-ai",
