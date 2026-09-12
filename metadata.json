@@ -1,7 +1,8 @@
 {
-  "name": "Buy or Wait AI",
-  "description": "AI-powered financial agent to forecast 90-day cash flows, predict user affordability, and recommend safe payment strategies.",
+  "name": "AffordAI",
+  "description": "Autonomous AI financial agent forecasting 90-day cash flows, liquidity risk, and optimal payment plans.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
-

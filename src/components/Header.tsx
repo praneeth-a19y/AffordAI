@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, ShieldCheck, Sparkles, FileSpreadsheet, Archive, FileText, CheckCircle2 } from "lucide-react";
+import { Download, Sparkles, BrainCircuit, ShieldCheck, Zap } from "lucide-react";
 
 interface HeaderProps {
   onOpenSubmissionModal: () => void;
@@ -13,23 +13,23 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSubmissionModal, onOpenSce
         
         {/* Brand & Purpose */}
         <div className="flex items-center space-x-3 w-full md:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm shrink-0">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-900 via-indigo-700 to-purple-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <BrainCircuit className="w-5 h-5 text-indigo-200" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight">Buy or Wait?</h1>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
-                90-Day Cash Flow Engine
-              </span>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <h1 className="text-lg font-black text-slate-900 tracking-tight">AffordAI</h1>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                 <Sparkles className="w-3 h-3 mr-1 text-indigo-600" />
-                Gemini 3.8 Flash
+                Autonomous Financial Agent
+              </span>
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                90-Day Cash Flow Engine
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Predicting financial affordability, safe payment methods & cash flow impact
+              Determining safe payment limits, optimal methods, and payment schedules from user financial datasheets
             </p>
           </div>
         </div>
@@ -39,10 +39,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSubmissionModal, onOpenSce
           <button
             id="btn-custom-scenario"
             onClick={onOpenScenarioModal}
-            className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-300"
+            className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors border border-indigo-200"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
-            Simulate Custom Expense
+            Custom Expense Test
           </button>
 
           <button
@@ -59,3 +59,4 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSubmissionModal, onOpenSce
     </header>
   );
 };
+

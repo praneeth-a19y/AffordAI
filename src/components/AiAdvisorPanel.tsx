@@ -44,7 +44,7 @@ export const AiAdvisorPanel: React.FC<AiAdvisorPanelProps> = ({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="text-sm font-bold text-slate-900">Gemini AI Financial Reasoning</h3>
+              <h3 className="text-sm font-bold text-slate-900">AffordAI Financial Reasoning & Risk Index</h3>
               <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">
                 gemini-3.8-flash
               </span>

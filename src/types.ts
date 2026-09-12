@@ -93,3 +93,11 @@ export interface AIAdvisorResponse {
   keyFactors?: string[];
   budgetingTips?: string[];
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'afford-ai';
+  text: string;
+  timestamp: string;
+  decisionData?: Partial<PredictionOutput>;
+}

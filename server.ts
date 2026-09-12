@@ -304,18 +304,23 @@ app.post("/api/ai-advisor", async (req, res) => {
         advice: `Based on deterministic 90-day cash flow analysis, your current headroom permits paying up to ${userProfile?.home_currency || '$'} ${simulationData?.amountSafeToPay || 0} today. Maintaining a safety reserve of ${userProfile?.home_currency || '$'} ${userProfile?.minimum_balance_to_keep || 0} is essential to weather upcoming recurring obligations.`,
         financialScore: 82,
         riskLevel: simulationData?.amountSafeToPay >= requestedAmount ? "Low" : "Moderate",
-        recommendations: [
+        keyFactors: [
+          `90-day reserve floor protected at ${userProfile?.home_currency || '$'} ${userProfile?.minimum_balance_to_keep || 0}`,
+          `Safe expenditure ceiling calculated from verified cash flow headroom`,
+          `Essential recurring expenses accounted for in timeline`
+        ],
+        budgetingTips: [
           "Preserve emergency buffer above minimum liquidity threshold.",
-          "Prioritize interest-free installments if immediate cash flow is required for upcoming rent.",
+          "Prioritize interest-free installments if immediate cash flow is required for upcoming obligations.",
           "Review flexible entertainment subscriptions if advancing full payment date is desired."
         ]
       });
     }
 
-    const prompt = `You are the lead financial analyst for 'Buy or Wait? AI Financial Agent'.
-Analyze the following affordability request and provide clear, professional, personalized financial advice.
+    const prompt = `You are AffordAI, the premier autonomous financial intelligence agent trained on user cash flow profiles and 90-day liquidity simulation.
+Analyze the following affordability request and provide clear, professional, personalized financial advice grounded in the 90-day cash flow projection.
 
-User Question: "${requestText}"
+User Request: "${requestText}"
 Requested Amount: ${userProfile?.home_currency || ''} ${requestedAmount}
 Current Available Balance: ${userProfile?.home_currency || ''} ${userProfile?.available_balance}
 Minimum Reserve Buffer: ${userProfile?.home_currency || ''} ${userProfile?.minimum_balance_to_keep}
@@ -349,6 +354,77 @@ Respond strictly in valid JSON format matching this schema:
   } catch (error: any) {
     console.error("Gemini advisor error:", error);
     res.status(500).json({ error: error.message || "Failed to generate AI advice" });
+  }
+});
+
+// 4b. Conversational AffordAI Chat Endpoint
+app.post("/api/afford-ai/chat", async (req, res) => {
+  try {
+    const {
+      message,
+      currentRequest,
+      userProfile,
+      simulationData,
+      currentRecommendation,
+    } = req.body;
+
+    const ai = getGeminiClient();
+    const cur = userProfile?.home_currency || "$";
+
+    if (!ai) {
+      // Fallback deterministic response
+      return res.json({
+        reply: `Hello! I am AffordAI. Looking at your financial profile, you have an available balance of ${cur} ${Number(userProfile?.available_balance || 0).toLocaleString()} with a required minimum buffer of ${cur} ${Number(userProfile?.minimum_balance_to_keep || 0).toLocaleString()}. For this request (${cur} ${Number(currentRequest?.requested_amount || 0).toLocaleString()}), you can safely spend up to ${cur} ${Number(simulationData?.amountSafeToPay || 0).toLocaleString()} today. The recommendation is "${currentRecommendation?.recommended_payment_method?.replace(/_/g, ' ') || 'wait'}". Let me know if you want to explore pausing flexible expenses!`,
+      });
+    }
+
+    const systemContext = `You are AffordAI, an advanced AI financial intelligence copilot specializing in consumer affordability and 90-day cash flow optimization.
+You are trained to calculate and explain:
+1. amount_safe_to_pay: maximum amount safe to pay today (${cur} ${simulationData?.amountSafeToPay ?? 0})
+2. affordability_status: ${currentRecommendation?.affordability_status}
+3. recommended_payment_method: ${currentRecommendation?.recommended_payment_method}
+4. payment_plan: ${currentRecommendation?.payment_plan}
+5. earliest_date_for_full_payment: ${currentRecommendation?.earliest_date_for_full_payment}
+6. spending_changes_needed: ${currentRecommendation?.spending_changes_needed}
+7. decision_explanation: ${currentRecommendation?.decision_explanation}
+
+User Profile Details:
+- User ID: ${userProfile?.user_id}
+- Currency: ${cur}
+- Available Balance: ${cur} ${userProfile?.available_balance}
+- Minimum Reserve to Keep: ${cur} ${userProfile?.minimum_balance_to_keep}
+- Priorities: ${userProfile?.financial_priorities}
+- Spending Style: ${userProfile?.spending_preferences}
+- Allowed Methods: ${userProfile?.payment_methods_user_will_consider}
+
+Current Request:
+- Text: "${currentRequest?.request_text || 'Current Expense'}"
+- Requested Amount: ${cur} ${currentRequest?.requested_amount}
+- Request Date: ${currentRequest?.request_date}
+- Desired Completion Date: ${currentRequest?.desired_completion_date}
+- Allows Partial/Split: ${currentRequest?.allows_partial_payment}
+
+Current 90-Day Simulation:
+- Safe to Pay Today: ${cur} ${simulationData?.amountSafeToPay}
+- Earliest Date for Full Payment: ${simulationData?.earliestDateForFull}
+- Lowest Headroom: ${cur} ${simulationData?.minHeadroom}
+
+Instructions:
+- Address the user directly as their trusted financial AI copilot (AffordAI).
+- Be concise, direct, helpful, and grounded in these numbers.
+- Answer the user's specific query directly, explaining why an expense is safe or risky based on preserving their ${cur} ${userProfile?.minimum_balance_to_keep} reserve buffer.
+- Keep response under 3-4 short paragraphs or bullet points.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.8-flash",
+      contents: `${systemContext}\n\nUser Message: "${message}"\n\nAffordAI Response:`,
+    });
+
+    const replyText = response.text || "I am analyzing your cash flow projection to ensure your reserve buffer remains safe.";
+    res.json({ reply: replyText });
+  } catch (error: any) {
+    console.error("AffordAI chat error:", error);
+    res.status(500).json({ error: error.message || "Failed to process AffordAI chat" });
   }
 });
 
