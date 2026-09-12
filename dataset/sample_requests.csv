@@ -1,0 +1,11 @@
+request_id,amount_safe_to_pay,affordability_status,recommended_payment_method,payment_plan,earliest_date_for_full_payment,spending_changes_needed,decision_explanation
+request_26,9883925.08,affordable_later,wait,none,2025-08-10,none,Full payment becomes safe on 2025-08-10 once confirmed income arrives and balance recovers.
+request_27,4641.53,affordable_later,wait,none,2026-07-19,none,Full payment becomes safe on 2026-07-19 once confirmed income arrives and balance recovers.
+request_28,82.37,affordable_later,wait,none,2024-06-28,none,Full payment becomes safe on 2024-06-28 once confirmed income arrives and balance recovers.
+request_29,2744.19,affordable_later,wait,none,2025-11-12,none,Full payment becomes safe on 2025-11-12 once confirmed income arrives and balance recovers.
+request_30,775.2,affordable_now,full_payment,2026-04-06:775.2,2026-04-06,none,The full amount of USD 775.2 is safe to pay today while keeping balance above the minimum buffer of 200.77.
+request_31,5629464.46,affordable_later,wait,none,2024-09-25,none,Full payment becomes safe on 2024-09-25 once confirmed income arrives and balance recovers.
+request_32,40018.0,affordable_with_plan,installments,2025-02-05:13606.12|2025-03-07:13606.12|2025-04-06:13606.12,2025-02-05,none,Installment plan opt_13 (3 payments of ZAR 13606.12) satisfies all 90-day safety requirements.
+request_33,51237.86,affordable_later,wait,none,2026-01-23,none,Full payment becomes safe on 2026-01-23 once confirmed income arrives and balance recovers.
+request_34,0.0,affordable_later,wait,none,2024-12-27,none,Full payment becomes safe on 2024-12-27 once confirmed income arrives and balance recovers.
+request_35,212000.0,affordable_now,full_payment,2025-10-30:212000,2025-10-30,none,The full amount of INR 212000 is safe to pay today while keeping balance above the minimum buffer of 54536.07.

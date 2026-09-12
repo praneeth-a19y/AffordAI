@@ -1,0 +1,7 @@
+{
+  "name": "Buy or Wait AI",
+  "description": "AI-powered financial agent to forecast 90-day cash flows, predict user affordability, and recommend safe payment strategies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
